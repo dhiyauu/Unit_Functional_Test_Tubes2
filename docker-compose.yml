@@ -1,0 +1,4 @@
+tracking-service:
+    build: ./tracking-service
+    ports:
+      - "8084:8084"
