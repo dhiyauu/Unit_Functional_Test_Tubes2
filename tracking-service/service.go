@@ -1,51 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
-	"time"
-)
-
-// Simulasi database di memory untuk test jika belum konek DB sungguhan
-var trackingEvents []TrackingEvent
-var nextTrackingID = 1
-
-// INI BUAT TES LEWAT DOCKER, FUNCTIONAL TES
-var OrderServiceURL = "http://order-service:8080"
-
-// INI BUAT UNIT TES, LEWAT LOCAL
-// var OrderServiceURL = "http://localhost:8080"
-
-// ResiValidator adalah interface untuk mempermudah unit test (mocking)
-// Digunakan untuk mengecek apakah resi valid/ada di Order Service
-type ResiValidator interface {
-	CheckResi(resi string) bool
-}
-
-type RealResiValidator struct{}
-
-func (v RealResiValidator) CheckResi(resi string) bool {
-	req, _ := http.NewRequest(
-		"GET",
-		fmt.Sprintf("%s/order?resi=%s", OrderServiceURL, resi),
-		nil,
-	)
-
-	// Set timeout agar tidak gantung jika service mati
-	client := &http.Client{Timeout: 3 * time.Second}
-	resp, err := client.Do(req)
-
-	if err != nil {
-		fmt.Println("ORDER SERVICE ERROR:", err)
-		return false
-	}
-
-	fmt.Println("ORDER SERVICE STATUS:", resp.StatusCode)
-
-	// Asumsi return 200 OK berarti resi valid
-	return resp.StatusCode == 200
-}
-
 // --- Tracking Functions ---
 
 // GetTrackingStatus mengambil timeline dari database (belum diimplementasikan)
