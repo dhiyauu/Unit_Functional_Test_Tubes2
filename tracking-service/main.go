@@ -1,11 +1,28 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
+
+	db, err := sql.Open(
+		"mysql",
+		"root:root@tcp(mysql:3306)/tubesdb",
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	trackingRepo = MySQLRepository{
+		DB: db,
+	}
+	
 	// Endpoint untuk Tracking Service
 	http.HandleFunc("/tracking", getTrackingHandler)
 	http.HandleFunc("/tracking/event", insertTrackingEventHandler)

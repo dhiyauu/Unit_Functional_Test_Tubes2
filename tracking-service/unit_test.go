@@ -2,44 +2,65 @@ package main
 
 import "testing"
 
-// MockResiValidator adalah mock manual dari interface ResiValidator
+// ===============================
+// MOCK VALIDATOR
+// ===============================
 type MockResiValidator struct{}
 
-func (m MockResiValidator) CheckResi(resi string) bool {
-	// Selalu mereturn true untuk mensimulasikan bahwa resi valid di Order Service
+func (m MockResiValidator) Validate(resi string) bool {
 	return true
 }
 
+// ===============================
+// MOCK REPOSITORY
+// ===============================
+type MockRepository struct{}
+
+func (m MockRepository) Insert(event TrackingEvent) error {
+	return nil
+}
+
+// ===============================
+// UNIT TEST INSERT TRACKING
+// ===============================
 func TestInsertTrackingEvent(t *testing.T) {
-	mock := MockResiValidator{}
+
+	mockValidator := MockResiValidator{}
+	mockRepo := MockRepository{}
 
 	req := TrackingEvent{
 		Resi:      "RESI123",
 		Lokasi:    "Gudang Jakarta",
 		Event:     "Paket diterima di gudang",
-		Timestamp: "2026-04-27T10:00:00Z",
+		Timestamp: "2026-04-27 10:00:00",
 	}
 
-	event, err := InsertTrackingEvent(req, mock)
+	event, err := InsertTrackingEvent(
+		req,
+		mockValidator,
+		mockRepo,
+	)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Test akan FAILED di sini karena InsertTrackingEvent di service.go 
-	// saat ini me-return TrackingEvent{} (kosong)
+	// Test akan FAILED kalau service belum selesai
 	if event.Resi != "RESI123" {
 		t.Fail()
 	}
 }
 
+// ===============================
+// UNIT TEST GET TRACKING
+// ===============================
 func TestGetTrackingStatus(t *testing.T) {
+
 	resi := "RESI123"
 
 	resp := GetTrackingStatus(resi)
 
-	// Test akan FAILED di sini karena GetTrackingStatus di service.go
-	// saat ini me-return nil
+	// Akan FAILED karena service masih return nil
 	if resp == nil {
 		t.Fatal("Expected response but got nil")
 	}
@@ -49,7 +70,11 @@ func TestGetTrackingStatus(t *testing.T) {
 	}
 }
 
+// ===============================
+// UNIT TEST DISTANCE
+// ===============================
 func TestCalculateDistance(t *testing.T) {
+
 	req := DistanceRequest{
 		OriginAddress:      "Bandung",
 		DestinationAddress: "Jakarta",
@@ -57,8 +82,7 @@ func TestCalculateDistance(t *testing.T) {
 
 	resp := CalculateDistance(req)
 
-	// Test akan FAILED di sini karena CalculateDistance di service.go
-	// saat ini me-return nil
+	// Akan FAILED karena service masih return nil
 	if resp == nil {
 		t.Fatal("Expected response but got nil")
 	}

@@ -5,7 +5,7 @@ pipeline {
         // Sesuaikan dengan Docker Registry kamu (misal: dockerhub_username)
         // Jika hanya main lokal (minikube), bagian push bisa di-skip atau diarahkan ke local registry
         DOCKER_REGISTRY = "docker.io/dhiyauu"
-        IMAGE_NAME = "tubestahap2-tracking-service"
+        IMAGE_NAME = "Unit_Functional_Test_Tubes2"
         IMAGE_TAG = "${env.BUILD_ID}"
     }
 
@@ -23,7 +23,7 @@ pipeline {
                 dir('tracking-service') {
                     // Hanya menjalankan file test yang bukan functional test (jika dipisah dengan build tag)
                     // Atau secara default go test akan menjalankan unit_test.go yang sudah kita buat
-                    sh 'go test -v ./... -skip Functional'
+                    bat 'go test -v ./... -skip Functional'
                 }
             }
         }
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 echo 'Running Go Vet for static analysis...'
                 dir('tracking-service') {
-                    sh 'go vet ./...'
+                    bat 'go vet ./...'
                 }
             }
         }
@@ -41,9 +41,9 @@ pipeline {
             steps {
                 echo 'Building Docker Image...'
                 // Build tracking-service image
-                sh "docker build -t ${IMAGE_NAME}:latest ./tracking-service"
-                sh "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                bat "docker build -t ${IMAGE_NAME}:latest ./tracking-service"
+                bat "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                bat "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
             }
         }
 
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 echo 'Running Functional Tests (dengan database)...'
                 // Menyalakan service dan database menggunakan docker-compose
-                sh 'docker-compose up -d'
+                bat 'docker-compose up -d'
                 
                 // Tunggu sebentar agar database MySQL & service siap menerima koneksi
                 sleep time: 10, unit: 'SECONDS'
@@ -61,14 +61,14 @@ pipeline {
                     // Note: Test ini dipastikan FAILED sesuai kondisimu saat ini (kode belum selesai)
                     // Gunakan catchError agar pipeline bisa tetap lanjut / terlihat statusnya
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                        sh 'go test -v -run Functional ./...'
+                        bat 'go test -v -run Functional ./...'
                     }
                 }
             }
             post {
                 always {
                     echo 'Tearing down docker-compose...'
-                    sh 'docker-compose down'
+                    bat 'docker-compose down'
                 }
             }
         }
@@ -79,8 +79,8 @@ pipeline {
                 // Pastikan Jenkins sudah login ke registry menggunakan credentials
                 // sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
                 
-                sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                bat "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                bat "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
             }
         }
 
@@ -88,11 +88,11 @@ pipeline {
             steps {
                 echo 'Deploying to Kubernetes...'
                 // Mengaplikasikan file yaml ke cluster kubernetes
-                sh 'kubectl apply -f k8s/tracking-deployment.yaml'
-                sh 'kubectl apply -f k8s/tracking-service.yaml'
+                bat 'kubectl apply -f k8s/tracking-deployment.yaml'
+                bat 'kubectl apply -f k8s/tracking-service.yaml'
                 
                 // Force update image deployment ke tag yang baru saja di-build
-                sh "kubectl set image deployment/tracking-service tracking-service=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                bat "kubectl set image deployment/tracking-service tracking-service=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
 
@@ -100,11 +100,11 @@ pipeline {
             steps {
                 echo 'Verifying deployment...'
                 // Mengecek status pod dan service untuk memastikan semua berjalan
-                sh 'kubectl get pods -l app=tracking-service'
-                sh 'kubectl get svc tracking-service'
+                bat 'kubectl get pods -l app=tracking-service'
+                bat 'kubectl get svc tracking-service'
                 
                 // Rollout status untuk memastikan deployment selesai tanpa error CrashLoopBackOff
-                sh 'kubectl rollout status deployment/tracking-service --timeout=60s'
+                bat 'kubectl rollout status deployment/tracking-service --timeout=60s'
             }
         }
     }

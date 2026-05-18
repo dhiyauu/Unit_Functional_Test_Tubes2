@@ -25,7 +25,7 @@ import (
 const (
 	dbUser = "root"
 	dbPass = "root"
-	dbHost = "mysql"
+	dbHost = "localhost"
 	dbPort = "3306"
 	dbName = "tubesdb" // Gunakan database yang sesuai untuk Tubes
 )
@@ -72,7 +72,7 @@ func TestInsertTrackingEvent_Functional(t *testing.T) {
 		"resi":"%s",
 		"lokasi":"Gudang Jakarta",
 		"event":"Paket diterima di gudang",
-		"timestamp":"2026-04-27T10:00:00Z"
+		"timestamp":"2026-04-27 10:00:00"
 	}`, resi))
 
 	req, _ := http.NewRequest(

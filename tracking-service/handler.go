@@ -7,12 +7,17 @@ import (
 )
 
 var resiValidator ResiValidator = RealResiValidator{}
+var trackingRepo TrackingRepository
 
 func insertTrackingEventHandler(w http.ResponseWriter, r *http.Request) {
 	var req TrackingEvent
 	json.NewDecoder(r.Body).Decode(&req)
 
-	result, err := InsertTrackingEvent(req, resiValidator)
+	result, err := InsertTrackingEvent(
+		req,
+		resiValidator,
+		trackingRepo,
+	)
 
 	if err != nil {
 		w.WriteHeader(400)

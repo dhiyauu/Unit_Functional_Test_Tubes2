@@ -1,5 +1,7 @@
 package main
 
+import "errors"
+
 // --- Tracking Functions ---
 
 // GetTrackingStatus mengambil timeline dari database (belum diimplementasikan)
@@ -8,8 +10,23 @@ func GetTrackingStatus(resi string) *TrackingResponse {
 }
 
 // InsertTrackingEvent memasukkan event baru dengan memvalidasi resi terlebih dahulu
-func InsertTrackingEvent(req TrackingEvent, v ResiValidator) (TrackingEvent, error) {
-	return TrackingEvent{}, nil
+func InsertTrackingEvent(
+	req TrackingEvent,
+	v ResiValidator,
+	repo TrackingRepository,
+) (TrackingEvent, error) {
+
+	if !v.Validate(req.Resi) {
+		return TrackingEvent{}, errors.New("invalid resi")
+	}
+
+	err := repo.Insert(req)
+
+	if err != nil {
+		return TrackingEvent{}, err
+	}
+
+	return req, nil
 }
 
 // --- Map/Location Functions ---
