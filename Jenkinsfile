@@ -5,7 +5,7 @@ pipeline {
         // Sesuaikan dengan Docker Registry kamu (misal: dockerhub_username)
         // Jika hanya main lokal (minikube), bagian push bisa di-skip atau diarahkan ke local registry
         DOCKER_REGISTRY = "docker.io/dhiyauu"
-        IMAGE_NAME = "Unit_Functional_Test_Tubes2"
+        IMAGE_NAME = "tracking-service"
         IMAGE_TAG = "${env.BUILD_ID}"
     }
 
