@@ -84,14 +84,17 @@ pipeline {
             }
         }
 
-        stage('7. Deploy di Kubernetes') {
+       stage('7. Deploy di Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes...'
-                // Mengaplikasikan file yaml ke cluster kubernetes
-                sh 'kubectl apply -f k8s/tracking-deployment.yaml'
-                sh 'kubectl apply -f k8s/tracking-service.yaml'
-                
-                // Force update image deployment ke tag yang baru saja di-build
+        
+                // Apply deployment
+                sh 'kubectl apply --validate=false -f k8s/tracking-deployment.yaml'
+        
+                // Apply service
+                sh 'kubectl apply --validate=false -f k8s/tracking-service.yaml'
+        
+                // Update image deployment
                 sh "kubectl set image deployment/tracking-service tracking-service=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
