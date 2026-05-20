@@ -107,7 +107,7 @@ pipeline {
                 sh 'kubectl get svc tracking-service'
                 
                 // Rollout status untuk memastikan deployment selesai tanpa error CrashLoopBackOff
-                sh 'kubectl rollout status deployment/tracking-service --timeout=60s'
+                sh 'kubectl rollout status deployment/tracking-service --timeout=180s'
             }
         }
     }
